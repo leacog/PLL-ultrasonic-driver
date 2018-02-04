@@ -1,3 +1,9 @@
+"""
+The core idea of this python sketch is to use the serial module to interface the driver with a computer. This is mainly for logging current and frequency measurements but the driver can also be configured to manually control the frequency through a low-pass filtered PWM signal (on pin 5 of the arduino-nano) connected via a switch to the VCO input of the CD4046. 
+
+NOTE: I'm completely inexperienced with python so please don't expect this to work on your machine without small to severe adjustments (for example the serial port paths will be different if you're not using windows)
+"""
+
 import sys, serial, os, threading
 from appJar import gui
 import serial.tools.list_ports

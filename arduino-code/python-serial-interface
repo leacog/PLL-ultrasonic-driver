@@ -1,0 +1,82 @@
+import sys, serial, os, threading
+from appJar import gui
+import serial.tools.list_ports
+import matplotlib.pyplot as plt
+
+from numpy import sin, pi, arange
+import random
+
+app = gui("Grid Demo", "600x400")
+COMPORT = "COM13"
+BAUDRATE = 9600
+fname = "output2.txt"
+toReplace = False
+decided = False
+
+
+def freqSweep(meaningless):
+    fname = app.getEntry("fname")  + ".txt"
+    if (os.path.exists(fname)):
+        #app.yesNoBox("replace", "Replace existing file?", parent=None)
+        if not (app.yesNoBox("replace", "Replace existing file?", parent=None)):
+            app.setFocus("fname")
+            return
+
+    try:
+        output_file=open(fname, "w")
+    except:
+        app.infoBox("fileError", "Somwthing is wrong with the name", parent=None)
+        return
+
+    try:
+        ser = serial.Serial(app.getOptionBox("Port"), app.getOptionBox("Baudrate"), timeout=0)
+    except:
+        app.infoBox("serialError", "Something's not working with the serial connection: please resort to norwegian reset", parent=None)
+
+    i = 0
+    frq = []
+    cur = []
+    while True:
+        line = ser.readline()
+        if (not len(line.strip()) == 0):
+            line = line.decode("utf-8") #ser.readline returns a binary, convert to string
+            print(line)
+            if (line == 'Done'):
+                output_file.close()
+                print (cur, frq)
+                plt.plot(frq, cur)
+                plt.ylabel('some numbers')
+                axes = plt.gca()
+                axes.set_xlim([24890, 25460])
+                axes.set_ylim([70, 440])
+                plt.show()
+                ser.close()
+                return
+
+            try:
+                frq.append(line.split(',')[1])
+                cur.append(line.split(',')[0])
+            except IndexError:
+                print("Starting")
+            output_file.write(line + "\n")
+
+
+
+def refreshPorts(btn):
+    if not [comport.device for comport in serial.tools.list_ports.comports()]:
+        app.changeOptionBox("Port", ["-No device detected-"], callFunction=False)
+        return
+    app.changeOptionBox("Port", [comport.device for comport in serial.tools.list_ports.comports()], callFunction=False)
+
+
+app.setFont(12)
+app.addLabelOptionBox("Port", [comport.device for comport in serial.tools.list_ports.comports()], 0, 0, 1)
+app.addButton("Refresh", refreshPorts, 0, 1, 1)
+app.addLabelOptionBox("Baudrate", ["9600", "27600", "57600", "115200"])
+app.setFont(20)
+app.addDirectoryEntry("OutputDirectory", 2, 0, 2)
+app.addValidationEntry("fname")
+app.addLabel("fnameChoice", "File name", 3, 1)
+app.addButton("freqSweep", freqSweep)
+app.setButton("freqSweep", "Run test")
+app.go()

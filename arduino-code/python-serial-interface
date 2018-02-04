@@ -8,15 +8,13 @@ NOTE: I'm completely inexperienced with python so please don't expect this to wo
 adjustments (for example the serial port paths will be different if you're not using windows)
 """
 
-import sys, serial, os, threading
+import sys, serial, os, threading, random
 from appJar import gui
 import serial.tools.list_ports
 import matplotlib.pyplot as plt
-
 from numpy import sin, pi, arange
-import random
 
-app = gui("Grid Demo", "600x400")
+app = gui("PLL-driver-interface", "600x400")
 COMPORT = "COM13"
 BAUDRATE = 9600
 fname = "output2.txt"
@@ -35,7 +33,7 @@ def freqSweep(meaningless):
     try:
         output_file=open(fname, "w")
     except:
-        app.infoBox("fileError", "Somwthing is wrong with the name", parent=None)
+        app.infoBox("fileError", "Something is wrong with the name", parent=None)
         return
 
     try:

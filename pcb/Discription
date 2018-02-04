@@ -1,0 +1,3 @@
+This directory contains the final artwork used for the pcb. If you wish to edit/improve the design all KiCad project files are provided as well.
+
+NOTE: external footprint libraries are used for many component which likely will result in erros unless you have them all installed. The easiest way to solve this is by editing the footprints in the netlist. Beware that footprints aren't automatically swaped, the footprint accosiation is only updated once the old footprints have been deleted from the board and the netlist. (I advise to double-check that the pinouts for changed footprints are correct!)

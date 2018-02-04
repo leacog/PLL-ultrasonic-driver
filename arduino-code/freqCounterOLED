@@ -1,0 +1,112 @@
+/*
+This code relies entierly on Paul Stoffregen's FreqCounter library for frequency measurement and I heavily recommend reading his
+article on how to set it up and calibrate the measurment: https://www.pjrc.com/teensy/td_libs_FreqCount.html 
+
+the library is currently maintained at:
+https://github.com/PaulStoffregen/FreqCount
+*/
+
+#include <FreqCounter.h>
+#include <Arduino.h>
+#include <U8g2lib.h>
+#include <SPI.h>
+
+long int frq;
+int i=0;
+const int VCOPIN = 6;
+const int CurrentSensePIN = A0;  
+
+//U8G2_SSD1306_128X64_NONAME_F_4W_HW_SPI u8g2(U8G2_R0, /* cs=*/ 10, /* dc=*/ 9, /* reset=*/ 8);
+U8G2_SH1106_128X64_NONAME_F_4W_HW_SPI u8g2(U8G2_R0, /* cs=*/ 10, /* dc=*/ 9, /* reset=*/ 8);
+void setup() {
+  Serial.begin(57600);
+  u8g2.begin();
+  u8g2.enableUTF8Print();
+  u8g2.setDisplayRotation(U8G2_R2);
+  pinMode(CurrentSensePIN, INPUT);
+  pinMode(VCOPIN, OUTPUT);
+  findMax(0, 255);
+  FreqCounter::f_comp = 10;
+  FreqCounter::start(1000);
+}
+
+void loop() {
+    
+    //Kör på Pin 5, den är mappad till timer 1 counter
+    if(FreqCounter::f_ready){
+      frq = FreqCounter::f_freq;
+      FreqCounter::f_comp = 10;
+      FreqCounter::start(1000);
+    }
+    
+    int RMS = runningAverage(analogRead(CurrentSensePIN));
+    int CURRENT = RMS*3*0.2712-4.43; 
+    if(CURRENT<24) CURRENT=0;
+    Serial.print(frq);
+    Serial.print(",");
+    Serial.print(RMS);
+    Serial.print(",");
+    Serial.println(CURRENT);
+    
+    u8g2.clearBuffer();          // clear the internal memory
+    u8g2.setFont(u8g2_font_timR18_tr); // choose a suitable font
+    u8g2.setCursor(0, 20);
+    u8g2.print("f: ");// write something to the internal memory
+    u8g2.print(frq);
+    u8g2.setFont(u8g2_font_timR12_tr);
+    u8g2.print("Hz");
+    u8g2.setFont(u8g2_font_timR18_tr); // choose a suitable font
+    u8g2.setCursor(0, 40);
+    u8g2.print("A: ");// write something to the internal memory
+    u8g2.print(CURRENT);// write something to the internal memory
+    u8g2.setFont(u8g2_font_timR12_tr);
+    u8g2.print("mA");// write something to the internal memory
+    u8g2.sendBuffer();          // transfer internal memory to the display
+}
+
+void FreqSweep() {
+  for(int i; i<256; i++) {
+    digitalWrite(VCOPIN, i);         
+     FreqCounter::f_comp = 10;
+      FreqCounter::start(1000);
+      while(FreqCounter::f_ready == 0)
+     frq = FreqCounter::f_freq;
+   }
+}
+
+long runningAverage(int M){
+  #define LM_SIZE 10
+  static int LM[LM_SIZE];      // LastMeasurements
+  static byte index = 0;
+  static long sum = 0;
+  static byte count = 0;
+
+  // keep sum updated to improve speed.
+  sum -= LM[index];
+  LM[index] = M;
+  sum += LM[index];
+  index++;
+  index = index % LM_SIZE;
+  if (count < LM_SIZE) count++;
+
+  return sum / count;
+}
+
+long findMax(int startSweep, int stopSweep){
+  int lastReading=0;
+  int currentReading;
+  int maxIndex;
+  
+  for (int j = startSweep; j<(stopSweep+1); j++){
+    analogWrite(VCOPIN, j);
+    for (int k = 0; k < 3; k++){
+      delay(10);
+      currentReading =+ digitalRead(CurrentSensePIN); 
+    }
+    Serial.print(j);
+    if (currentReading > lastReading) maxIndex = j;
+    lastReading=currentReading;
+  }
+  analogWrite(VCOPIN, maxIndex);
+}
+

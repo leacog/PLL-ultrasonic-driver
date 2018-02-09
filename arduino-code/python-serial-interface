@@ -8,21 +8,20 @@ NOTE: I'm completely inexperienced with python so please don't expect this to wo
 adjustments (for example the serial port paths will be different if you're not using windows)
 """
 
-import sys, serial, os, threading, random
+import sys, serial, os, random
 from appJar import gui
 import serial.tools.list_ports
 import matplotlib.pyplot as plt
 from numpy import sin, pi, arange
 
 app = gui("PLL-driver-interface", "600x400")
-COMPORT = "COM13"
 BAUDRATE = 9600
-fname = "output2.txt"
+fname = "output.txt"
 toReplace = False
 decided = False
 
 
-def freqSweep(meaningless):
+def freqSweep(meaningless):                  #appJar gui kräver tydligen att man anger minst ett argument till funktionen, därav meaningless
     fname = app.getEntry("fname")  + ".txt"
     if (os.path.exists(fname)):
         #app.yesNoBox("replace", "Replace existing file?", parent=None)

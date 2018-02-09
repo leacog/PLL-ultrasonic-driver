@@ -12,7 +12,6 @@ https://github.com/PaulStoffregen/FreqCount
 #include <SPI.h>
 
 long int frq;
-int i=0;
 const int VCOPIN = 6;
 const int CurrentSensePIN = A0;  
 

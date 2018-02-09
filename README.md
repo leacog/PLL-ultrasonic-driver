@@ -2,7 +2,7 @@
 KiCad project files and arduino code for an in-expensive and simple phase-locked-loop driver for piezo-electric ultrasonic transducers. 
 
 ### Principle of operation
-The drives uses the fact that, at resonance, current and voltage is in phase for a piezoelectric transducer. By locking the driving signal to the current feedback signal, i.e. adjust the driving frequency until it is in-phase with the current, resonance of the transducer can be found. 
+The driver exploits the fact that, at resonance, current and voltage is in phase for a piezoelectric transducer. By locking the driving signal to the current feedback signal, i.e. adjust the driving frequency until it is in-phase with the current, resonance of the transducer can be found. 
 
 The driver is based around the CD4046 Phase Locked Loop (PLL) IC(Texas instruments has a good application report: http://www.ti.com/lit/an/scha002a/scha002a.pdf) and an arduino nano. The driver features two modes of operation:
 
